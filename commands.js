@@ -2,111 +2,92 @@
 	var request = require('request');
   var fs = require('fs');
 
-  exports.commands = function(cmdArr) {
-  	var cmd = cmdArr[0];
-  	if (cmd === "pwd") {
-    	pwd();
-  	}
-  	else if (cmd === 'date') {
-  		date();
-  	} else if (cmd === 'ls') {
-  		ls();
-  	} else if (cmd === 'echo') {
-  		echo(cmdArr.slice(1));
-  	} else if (cmd === 'cat') {
-  		cat(cmdArr.slice(1));
-  	} else if (cmd === 'head') {
-  		head(cmdArr.slice(1));
-  	} else if (cmd === 'tail') {
-  		tail(cmdArr.slice(1));
-  	} else if (cmd === 'sort') {
-  		sort(cmdArr.slice(1));
-  	} else if (cmd === 'wc') {
-  		wc(cmdArr.slice(1));
-  	} else if (cmd === 'uniq') {
-  		uniq(cmdArr.slice(1));
-  	} else if (cmd === 'curl') {
-  		curl(cmdArr.slice(1));
-  	}
 
-
-
-  }
-	var done = function(){
+exports.done = function(output){
+		process.stdout.write(output);
 		process.stdout.write('\nprompt > ');
 	}
-  var pwd = function(file) {
-  	process.stdout.write(process.env.PWD);
-		done();
+
+exports.pwd = function(file) {
+		exports.done(process.env.PWD);
   }
 
-  var date = function(file) {
-		var date = new Date(98, 1);
-		date.setFullYear(2070)
-		process.stdout.write(date.toString());
-		done();
+exports.date = function(file) {
+		exports.done(Date());
   }
 
-  var ls = function(file) {
+exports.ls = function(file) {
+		var output = '';
   	fs.readdir('.', function(err, files) {
   		if(err) throw err;
   		files.forEach(function(file) {
-  			process.stdout.write(file.toString() + '\n');
+				output += file.toString() + '\n'
   		})
-  		done();
+  		exports.done(output);
   	});
   }
 
-  var echo = function(file) {
-  	process.stdout.write(file.join(' '));
-		done();
+exports.echo = function(file) {
+  	var output = file.join(' ');
+		exports.done(output);
   }
 
- var cat = function(file) {
+exports.cat = function(file) {
+	 var output = '';
+
 	 fs.readFile(file[0], 'utf8', function(err, lines){
 		 if(err) throw err;
-		 process.stdout.write(lines + '\n');
-		 done();
+		 output += lines + '\n';
+		 exports.done(output);
 	 });
-
  }
 
- var head = function(file) {
+exports.head = function(file) {
+	 var output = '';
+
 	 fs.readFile(file[0], 'utf8', function(err, lines){
 		 	if(err) throw err;
 			 var splitLines = lines.split('\n')
-			 process.stdout.write(splitLines.slice(0,5).join("\n"));
-			 done();
+			 output += splitLines.slice(0,5).join("\n");
+			 exports.done(output);
 	 });
  }
 
- var tail = function(file) {
+exports.tail = function(file) {
+	  var output = '';
+
 	 fs.readFile(file[0], 'utf8', function(err, lines) {
 		 	if(err) throw err;
 			 var splitLines = lines.split('\n')
 			 var len = splitLines.length
-			 process.stdout.write(splitLines.slice(len-5).join("\n"));
-			 done();
+			 output += splitLines.slice(len-5).join("\n");
+			 exports.done(output);
 	 });
+ }
 
- }
- var sort = function(file) {
+exports.sort = function(file) {
+	 var output = '';
+
 	 fs.readFile(file[0], 'utf8', function(err, lines){
 		 	if(err) throw err;
 			 var splitLines = lines.split('\n')
-			 process.stdout.write(splitLines.sort().join("\n"));
-			 done();
+			 output += splitLines.sort().join("\n");
+			 exports.done(output);
 	 });
  }
- var wc = function(file) {
+
+exports.wc = function(file) {
+	 var output = '';
+
 	 fs.readFile(file[0], 'utf8', function(err, lines){
 		 	if(err) throw err;
 			 var splitLines = lines.split('\n')
-			 process.stdout.write(String(splitLines.length));
-			 done();
+			 output += String(splitLines.length);
+			 exports.done(output);
 	 });
  }
- var uniq = function(file) {
+
+exports.uniq = function(file) {
 	 fs.readFile(file[0], 'utf8', function(err, lines){
 		 	if(err) throw err;
 			 var splitLines = lines.split('\n');
@@ -118,16 +99,14 @@
 					}
 			 })
 
-			 process.stdout.write(newArr.join("\n"));
-			 done();
+			 exports.done(newArr.join("\n"));
 	 });
  }
 
- var curl = function(file){
+exports.curl = function(file){
 	 request(file[0], function (error, response, body) {
 			if (!error && response.statusCode == 200) {
-				console.log(body) // Show the HTML for the Google homepage.
+				exports.done(body);
 			};
-			done();
 		});
  }
